@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b10">
+<title>HH00 · Roulette</title>
+<style>
+:root{color-scheme:dark;--bg:#090b10;--muted:#8992a5;--white:#f4f6fb;--accent:#9b7cff}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 50% -15%,#28203f 0,transparent 48%),var(--bg);color:var(--white)}
+body{min-height:100svh;display:grid;place-items:center;padding:24px 16px}
+main{width:min(100%,480px);text-align:center}
+.top{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:30px;color:#c9c2ff;font-size:12px;font-weight:800;letter-spacing:.22em}
+.mark{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent)}
+h1{font-size:clamp(32px,8vw,46px);letter-spacing:-.055em;margin:0;font-weight:850}
+.sub{color:var(--muted);font-size:14px;margin:10px 0 28px}
+.panel{padding:24px 18px 20px;background:linear-gradient(145deg,#ffffff10,#ffffff05);border:1px solid #ffffff17;border-radius:28px;box-shadow:0 24px 80px #0008;backdrop-filter:blur(18px)}
+.wheel-wrap{width:min(78vw,310px);aspect-ratio:1;margin:4px auto 24px;position:relative;display:grid;place-items:center}
+.pointer{position:absolute;z-index:3;top:-7px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:25px solid white;filter:drop-shadow(0 3px 7px #0009)}
+.wheel{width:100%;height:100%;border-radius:50%;border:8px solid #202433;box-shadow:0 0 0 2px #ffffff16,0 14px 36px #0009,inset 0 0 0 2px #ffffff25;background:conic-gradient(#8f78ed 0 45deg,#262b3c 45deg 90deg,#65c6d8 90deg 135deg,#262b3c 135deg 180deg,#8f78ed 180deg 225deg,#262b3c 225deg 270deg,#65c6d8 270deg 315deg,#262b3c 315deg 360deg);position:relative;transition:transform 4.2s cubic-bezier(.12,.72,.12,1)}
+.wheel:before{content:"";position:absolute;inset:13%;border-radius:50%;border:1px solid #ffffff30}
+.wheel:after{content:"HH00";position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:#111520;border:5px solid #d9d3ff;color:white;font-size:17px;font-weight:900;letter-spacing:.08em;box-shadow:0 4px 18px #0009}
+.labels{position:absolute;inset:0;pointer-events:none}
+.labels span{position:absolute;left:50%;top:50%;width:58px;margin-left:-29px;margin-top:-8px;font-size:10px;font-weight:850;letter-spacing:.12em;color:white;text-shadow:0 1px 5px #0008}
+.labels span:nth-child(1){transform:rotate(22.5deg) translateY(-112px)}
+.labels span:nth-child(2){transform:rotate(67.5deg) translateY(-112px)}
+.labels span:nth-child(3){transform:rotate(112.5deg) translateY(-112px)}
+.labels span:nth-child(4){transform:rotate(157.5deg) translateY(-112px)}
+.labels span:nth-child(5){transform:rotate(202.5deg) translateY(-112px)}
+.labels span:nth-child(6){transform:rotate(247.5deg) translateY(-112px)}
+.labels span:nth-child(7){transform:rotate(292.5deg) translateY(-112px)}
+.labels span:nth-child(8){transform:rotate(337.5deg) translateY(-112px)}
+button{width:100%;border:0;border-radius:15px;padding:16px 20px;background:linear-gradient(105deg,#9b7cff,#6c8bff);color:white;font-size:15px;font-weight:850;letter-spacing:.02em;box-shadow:0 8px 26px #8069ec44;cursor:pointer}
+button:disabled{opacity:.55;cursor:default}
+.status{min-height:22px;margin:14px 0 0;color:#c6c0f2;font-size:13px}
+.note{margin:18px auto 0;max-width:390px;color:#778093;font-size:11px;line-height:1.6}
+.foot{margin-top:22px;color:#51596b;font-size:10px;letter-spacing:.18em;font-weight:750}
+@media(max-width:360px){.panel{padding:18px 12px}}
+@media(prefers-reduced-motion:reduce){.wheel{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><i class="mark"></i> HH00 PROJECT</div>
+<h1>Roulette</h1>
+<p class="sub">Визуальная демо-рулетка</p>
+<section class="panel" aria-label="Демо-рулетка">
+<div class="wheel-wrap">
+<div class="pointer"></div>
+<div class="wheel" id="wheel" aria-label="Декоративное колесо"></div>
+<div class="labels" aria-hidden="true">
+<span>HH00</span><span>DEMO</span><span>HH00</span><span>TEST</span>
+<span>HH00</span><span>DEMO</span><span>HH00</span><span>TEST</span>
+</div>
+</div>
+<button id="spin" type="button">ПРОКРУТИТЬ ДЕМО</button>
+<p class="status" id="status" aria-live="polite">Нажми, чтобы запустить анимацию</p>
+</section>
+<p class="note">Это демонстрационная анимация интерфейса. Результаты, призы, ставки и выдача предметов не предусмотрены.</p>
+<div class="foot">HH00 · MINI APP</div>
+</main>
+<script>
+(()=>{const wheel=document.getElementById('wheel'),button=document.getElementById('spin'),status=document.getElementById('status');let turns=0,busy=false;
+button.addEventListener('click',()=>{if(busy)return;busy=true;button.disabled=true;status.textContent='Демо-анимация запущена…';turns+=5;wheel.style.transform='rotate('+turns*360+'deg)';
+const done=()=>{busy=false;button.disabled=false;status.textContent='Демо завершено · результат не определяется'};
+wheel.addEventListener('transitionend',done,{once:true});setTimeout(done,4700)});
+})();
+</script>
+</body>
+</html>
